@@ -113,6 +113,7 @@ public final class StreamAllocation {
   /**
    * Finds a connection and returns it if it is healthy. If it is unhealthy the process is repeated
    * until a healthy connection is found.
+   * 查找连接并在连接正常时返回它。如果连接不正常，则重复此过程，直到找到正常连接为止
    */
   private RealConnection findHealthyConnection(int connectTimeout, int readTimeout,
       int writeTimeout, boolean connectionRetryEnabled, boolean doExtensiveHealthChecks)
@@ -122,6 +123,7 @@ public final class StreamAllocation {
           connectionRetryEnabled);
 
       // If this is a brand new connection, we can skip the extensive health checks.
+      // 如果这是一个全新的连接，我们可以跳过大量的健康检查
       synchronized (connectionPool) {
         if (candidate.successCount == 0) {
           return candidate;
@@ -130,6 +132,8 @@ public final class StreamAllocation {
 
       // Do a (potentially slow) check to confirm that the pooled connection is still good. If it
       // isn't, take it out of the pool and start again.
+      // 执行(可能很慢)检查以确认池连接仍然良好。如果它
+      // 不是，把它从池里拿出来，重新开始
       if (!candidate.isHealthy(doExtensiveHealthChecks)) {
         noNewStreams();
         continue;
@@ -142,6 +146,7 @@ public final class StreamAllocation {
   /**
    * Returns a connection to host a new stream. This prefers the existing connection if it exists,
    * then the pool, finally building a new connection.
+   * 返回到承载新流的连接。如果现有连接存在，则首选现有连接，然后是池，最后构建新连接
    */
   private RealConnection findConnection(int connectTimeout, int readTimeout, int writeTimeout,
       boolean connectionRetryEnabled) throws IOException {
@@ -152,12 +157,14 @@ public final class StreamAllocation {
       if (canceled) throw new IOException("Canceled");
 
       // Attempt to use an already-allocated connection.
+      // 尝试使用已分配的连接
       RealConnection allocatedConnection = this.connection;
       if (allocatedConnection != null && !allocatedConnection.noNewStreams) {
         return allocatedConnection;
       }
 
       // Attempt to get a connection from the pool.
+      // 尝试从池中获取一个连接
       Internal.instance.get(connectionPool, address, this, null);
       if (connection != null) {
         return connection;
@@ -167,6 +174,7 @@ public final class StreamAllocation {
     }
 
     // If we need a route, make one. This is a blocking operation.
+    // 如果我们需要一个路由，创建一个，这是一个阻塞的操作
     if (selectedRoute == null) {
       selectedRoute = routeSelector.next();
     }
@@ -177,6 +185,9 @@ public final class StreamAllocation {
 
       // Now that we have an IP address, make another attempt at getting a connection from the pool.
       // This could match due to connection coalescing.
+      // 现在我们有了一个IP地址，再次尝试从池中获取连接
+      // 这可能由于连接合并而匹配。
+
       Internal.instance.get(connectionPool, address, this, selectedRoute);
       if (connection != null) {
         route = selectedRoute;
@@ -185,6 +196,7 @@ public final class StreamAllocation {
 
       // Create a connection and assign it to this allocation immediately. This makes it possible
       // for an asynchronous cancel() to interrupt the handshake we're about to do.
+      // 立即创建连接并将其分配给此分配。这使得异步cancel()可以中断我们将要进行的握手。
       route = selectedRoute;
       refusedStreamCount = 0;
       result = new RealConnection(connectionPool, selectedRoute);
@@ -192,16 +204,19 @@ public final class StreamAllocation {
     }
 
     // Do TCP + TLS handshakes. This is a blocking operation.
+    // 做 TCP +TLS 握手，这是一个阻塞的操作
     result.connect(connectTimeout, readTimeout, writeTimeout, connectionRetryEnabled);
     routeDatabase().connected(result.route());
 
     Socket socket = null;
     synchronized (connectionPool) {
       // Pool the connection.
+      // 添加到连接池
       Internal.instance.put(connectionPool, result);
 
       // If another multiplexed connection to the same address was created concurrently, then
       // release this connection and acquire that one.
+      // 如果并发地创建了另一个到同一地址的多路连接，那么释放这个连接并获取那个连接
       if (result.isMultiplexed()) {
         socket = Internal.instance.deduplicate(connectionPool, address, this);
         result = connection;
@@ -344,6 +359,8 @@ public final class StreamAllocation {
   /**
    * Use this allocation to hold {@code connection}. Each call to this must be paired with a call to
    * {@link #release} on the same connection.
+   * 使用这个分配来保存{@code连接}。对this的每个调用必须与对
+   * {@link #release}在同一连接上。
    */
   public void acquire(RealConnection connection) {
     assert (Thread.holdsLock(connectionPool));
@@ -401,6 +418,7 @@ public final class StreamAllocation {
     /**
      * Captures the stack trace at the time the Call is executed or enqueued. This is helpful for
      * identifying the origin of connection leaks.
+     * 在调用执行或排队时捕获堆栈跟踪。这有助于识别连接泄漏的来源。
      */
     public final Object callStackTrace;
 

@@ -46,6 +46,9 @@ import static java.util.concurrent.TimeUnit.SECONDS;
  * <p>Selecting a cache strategy may add conditions to the request (like the "If-Modified-Since"
  * header for conditional GETs) or warnings to the cached response (if the cached data is
  * potentially stale).
+ * 缓存策略，决定缓存的更新及保存。
+ *
+ * 工作的原理就是先从缓存里取，如果有，再经过CacheStraegy决定要不要用，如果不用，就走网络请求，得到响应后如果可以缓存就放进缓存里
  */
 public final class CacheStrategy {
   /** The request to send on the network, or null if this call doesn't use the network. */

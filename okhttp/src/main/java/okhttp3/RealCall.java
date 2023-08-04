@@ -129,14 +129,20 @@ final class RealCall implements Call {
       return RealCall.this;
     }
 
+    /**
+     * 异步请求的整个过程
+     */
     @Override protected void execute() {
       boolean signalledCallback = false;
       try {
+        // 1 进行具体的请求
         Response response = getResponseWithInterceptorChain();
         if (retryAndFollowUpInterceptor.isCanceled()) {
+          // 2 对失败的请求回调onFailure方法
           signalledCallback = true;
           responseCallback.onFailure(RealCall.this, new IOException("Canceled"));
         } else {
+          // 3 对成功的请求回调onResponse方法
           signalledCallback = true;
           responseCallback.onResponse(RealCall.this, response);
         }
@@ -148,6 +154,7 @@ final class RealCall implements Call {
           responseCallback.onFailure(RealCall.this, e);
         }
       } finally {
+        // 4 标示请求的结束finished方法
         client.dispatcher().finished(this);
       }
     }

@@ -54,6 +54,8 @@ import static okhttp3.internal.http.StatusLine.HTTP_TEMP_REDIRECT;
 /**
  * This interceptor recovers from failures and follows redirects as necessary. It may throw an
  * {@link IOException} if the call was canceled.
+ * 这个拦截器从失败中恢复，并在必要时遵循重定向。如果调用被取消，它可能会抛出一个IOException
+ * 重试及重定向拦截器，对产生异常的请求尝试恢复，即重试，无重试次数阈值。对返回重定向状态码的响应进行重定向，默认重定向阈值为20
  */
 public final class RetryAndFollowUpInterceptor implements Interceptor {
   /**

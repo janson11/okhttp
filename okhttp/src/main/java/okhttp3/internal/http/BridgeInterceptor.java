@@ -36,6 +36,12 @@ import static okhttp3.internal.Util.hostHeader;
  * Bridges from application code to network code. First it builds a network request from a user
  * request. Then it proceeds to call the network. Finally it builds a user response from the network
  * response.
+ * 从应用程序代码到网络代码的桥梁。
+ * 首先，它根据用户请求构建网络请求。
+ * 然后，它继续处理调用网络。
+ * 最后，它根据网络响应构建用户响应
+ *
+ * 对请求加header，例如Content-Type和Content-Length，对gzip压缩的响应重新构造。
  */
 public final class BridgeInterceptor implements Interceptor {
   private final CookieJar cookieJar;
@@ -75,6 +81,7 @@ public final class BridgeInterceptor implements Interceptor {
 
     // If we add an "Accept-Encoding: gzip" header field we're responsible for also decompressing
     // the transfer stream.
+    // 如果我们添加一个"Accept-Encoding: gzip"头字段，我们也负责解压缩传输流。
     boolean transparentGzip = false;
     if (userRequest.header("Accept-Encoding") == null && userRequest.header("Range") == null) {
       transparentGzip = true;

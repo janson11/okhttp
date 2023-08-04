@@ -118,6 +118,7 @@ public final class ConnectionPool {
   /**
    * Returns a recycled connection to {@code address}, or null if no such connection exists. The
    * route is null if the address has not yet been routed.
+   * 返回一个回收的连接到{@code address}，如果不存在这样的连接则返回null。如果该地址尚未被路由，则该路由为空。
    */
   @Nullable RealConnection get(Address address, StreamAllocation streamAllocation, Route route) {
     assert (Thread.holdsLock(this));

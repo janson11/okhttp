@@ -322,6 +322,7 @@ public final class RealConnection extends Http2Connection.Listener implements Co
   /**
    * To make an HTTPS connection over an HTTP proxy, send an unencrypted CONNECT request to create
    * the proxy connection. This may need to be retried if the proxy requires authorization.
+   * 要通过HTTP代理建立HTTPS连接，请发送未加密的CONNECT请求来创建代理连接。如果代理需要授权，则可能需要重试
    */
   private Request createTunnel(int readTimeout, int writeTimeout, Request tunnelRequest,
       HttpUrl url) throws IOException {
@@ -480,7 +481,9 @@ public final class RealConnection extends Http2Connection.Listener implements Co
     return socket;
   }
 
-  /** Returns true if this connection is ready to host new streams. */
+  /** Returns true if this connection is ready to host new streams.
+   * 如果此连接已准备好承载新流，则返回true
+   */
   public boolean isHealthy(boolean doExtensiveChecks) {
     if (socket.isClosed() || socket.isInputShutdown() || socket.isOutputShutdown()) {
       return false;

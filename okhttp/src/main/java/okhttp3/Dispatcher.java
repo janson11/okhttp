@@ -31,6 +31,9 @@ import okhttp3.internal.Util;
 
 /**
  * Policy on when async requests are executed.
+ * 异步请求执行策略【默认够用，最大并行执行请求数64，但域名最大执行请求数5】
+ * 使用ExecutorService提供的线程池服务，runningAsyncCalls为当前运行队列，readyAsyncCalls为阻塞待执行队列，
+ * 执行后的请求会调用finish方法以将待运行队列中的请求"promote"到运行队列中
  *
  * <p>Each dispatcher uses an {@link ExecutorService} to run calls internally. If you supply your
  * own executor, it should be able to run {@linkplain #getMaxRequests the configured maximum} number
